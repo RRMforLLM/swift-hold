@@ -1,16 +1,16 @@
-OPERADOR
-- Nombre: str (opcional)
-- Tiendas: list[str]
+OPERATOR
+- name: str (optional)
+- stores: list[str]
 
-UNIFORMES
-- ID: int
-- Tipo: str
-- Talla: str
+UNIFORMS
+- id: int
+- type: str
+- size: str
 
-OPERACIONES
-- ID: int
-- Operacion: bool        # Entrada (True) o Salida (False)
-- Uniforme: int          # FK a UNIFORMES.ID
-- Tienda: str            # Nombre o código de la tienda
-- Cantidad: int          # Cantidad de unidades afectadas
-- Fecha: datetime        # Fecha de la operación
+OPERATIONS
+- id: int
+- operation: bool       # Entry (true) or Exit (false)
+- uniform: int          # FK at UNIFORMS.id
+- store: str
+- quantity: int
+- date: datetime
