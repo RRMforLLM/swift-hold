@@ -1,33 +1,79 @@
 import ExportDbButton from '@/components/ExportDbButton';
 import { ThemedInput } from '@/components/ThemedInput';
+import { ThemedModal } from '@/components/ThemedModal';
+import { ThemedPressable } from '@/components/ThemedPressable';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { initDatabase } from '@/database/migrations';
-import { insertOperation } from '@/database/services';
+import { getUniforms, insertOperation, insertUniform } from '@/database/services';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { Button, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Button, StyleSheet, View } from 'react-native';
+
+interface Uniform {
+  id: number;
+  type: string;
+  size: string;
+}
 
 export default function HomeScreen() {
   useEffect(() => {
     initDatabase();
+    loadUniforms();
   }, []);
 
   const [option, setOption] = useState<'a' | 'b' | null>(null);
   const [text, setText] = useState('');
-  const [selection, setSelection] = useState<string>('');
+  const [uniforms, setUniforms] = useState<Uniform[]>([]);
+  const [selectedUniform, setSelectedUniform] = useState<Uniform | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newType, setNewType] = useState('');
+  const [newSize, setNewSize] = useState('');
+
+  const loadUniforms = async () => {
+    try {
+      const result = await getUniforms();
+      setUniforms(result as Uniform[]);
+    } catch (err) {
+      console.error('❌ Failed to load uniforms:', err);
+    }
+  };
+
+  const handleAddUniform = async () => {
+    if (!newType || !newSize) {
+      Alert.alert('Error', 'Por favor complete todos los campos');
+      return;
+    }
+
+    try {
+      await insertUniform({ type: newType, size: newSize });
+      setModalVisible(false);
+      setNewType('');
+      setNewSize('');
+      loadUniforms();
+    } catch (err) {
+      console.error('❌ Failed to add uniform:', err);
+      Alert.alert('Error', 'No se pudo agregar el uniforme');
+    }
+  };
 
   const handleSubmit = async () => {
+    if (!selectedUniform) {
+      Alert.alert('Error', 'Por favor seleccione un artículo');
+      return;
+    }
+
     try {
       await insertOperation({
         operation: option === 'a', // 'Entrada' = true
-        uniform: 1, // replace with actual selected uniform ID
+        uniform: selectedUniform.id,
         store: text,
         quantity: 1, // you can add a field for this
-        date: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"), // or just new Date().toISOString()
+        date: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
       });
     } catch (err) {
       console.error('❌ Failed to submit:', err);
+      Alert.alert('Error', 'No se pudo guardar la operación');
     }
   };
 
@@ -36,16 +82,16 @@ export default function HomeScreen() {
       <View style={styles.field}>
         <ThemedText type="defaultSemiBold">Operación:</ThemedText>
         <View style={styles.optionsContainer}>
-          <Pressable 
+          <ThemedPressable 
             style={[styles.option, option === 'a' && styles.selectedOption]} 
             onPress={() => setOption('a')}>
             <ThemedText>Entrada</ThemedText>
-          </Pressable>
-          <Pressable 
+          </ThemedPressable>
+          <ThemedPressable 
             style={[styles.option, option === 'b' && styles.selectedOption]} 
             onPress={() => setOption('b')}>
             <ThemedText>Salida</ThemedText>
-          </Pressable>
+          </ThemedPressable>
         </View>
       </View>
 
@@ -61,18 +107,61 @@ export default function HomeScreen() {
       <View style={styles.field}>
         <ThemedText type="defaultSemiBold">Artículo:</ThemedText>
         <View style={styles.selectContainer}>
-          {['Choice 1', 'Choice 2', 'Choice 3'].map((choice) => (
-            <Pressable
-              key={choice}
-              style={[styles.selectOption, selection === choice && styles.selectedOption]}
-              onPress={() => setSelection(choice)}>
-              <ThemedText>{choice}</ThemedText>
-            </Pressable>
+          {uniforms.map((uniform) => (
+            <ThemedPressable
+              key={uniform.id}
+              style={[styles.selectOption, selectedUniform?.id === uniform.id && styles.selectedOption]}
+              onPress={() => setSelectedUniform(uniform)}>
+              <ThemedText>{`${uniform.type} - ${uniform.size}`}</ThemedText>
+            </ThemedPressable>
           ))}
+          <ThemedPressable
+            style={styles.addButton}
+            onPress={() => setModalVisible(true)}>
+            <ThemedText>+ Agregar nuevo artículo</ThemedText>
+          </ThemedPressable>
         </View>
       </View>
 
       <Button title="Submit" onPress={handleSubmit} />
+
+      <ThemedModal
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+            <ThemedText type="defaultSemiBold">Nuevo Artículo</ThemedText>
+            
+            <View style={styles.field}>
+              <ThemedText type="defaultSemiBold">Tipo:</ThemedText>
+              <ThemedInput
+                value={newType}
+                onChangeText={setNewType}
+                placeholder="Tipo de uniforme"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <ThemedText type="defaultSemiBold">Talla:</ThemedText>
+              <ThemedInput
+                value={newSize}
+                onChangeText={setNewSize}
+                placeholder="Talla"
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <ThemedPressable 
+                style={[styles.option, { flex: 0.45 }]} 
+                onPress={() => setModalVisible(false)}>
+                <ThemedText>Cancelar</ThemedText>
+              </ThemedPressable>
+              <ThemedPressable 
+                style={[styles.option, styles.selectedOption, { flex: 0.45 }]} 
+                onPress={handleAddUniform}>
+                <ThemedText>Guardar</ThemedText>
+              </ThemedPressable>
+            </View>
+      </ThemedModal>
       <ExportDbButton />
     </ThemedView>
   );
@@ -103,7 +192,6 @@ const styles = StyleSheet.create({
   selectedOption: {
     backgroundColor: '#A1CEDC',
   },
-
   selectContainer: {
     gap: 8,
   },
@@ -113,5 +201,18 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     alignItems: 'center',
+  },
+  addButton: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 16,
   },
 });
