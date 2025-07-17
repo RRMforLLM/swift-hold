@@ -1,7 +1,10 @@
+import ExportDbButton from '@/components/ExportDbButton';
 import { ThemedInput } from '@/components/ThemedInput';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { initDatabase } from '@/database/migrations';
+import { insertOperation } from '@/database/services';
+import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { Button, Pressable, StyleSheet, View } from 'react-native';
 
@@ -14,8 +17,18 @@ export default function HomeScreen() {
   const [text, setText] = useState('');
   const [selection, setSelection] = useState<string>('');
 
-  const handleSubmit = () => {
-    console.log({ option, text, selection });
+  const handleSubmit = async () => {
+    try {
+      await insertOperation({
+        operation: option === 'a', // 'Entrada' = true
+        uniform: 1, // replace with actual selected uniform ID
+        store: text,
+        quantity: 1, // you can add a field for this
+        date: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"), // or just new Date().toISOString()
+      });
+    } catch (err) {
+      console.error('❌ Failed to submit:', err);
+    }
   };
 
   return (
@@ -60,6 +73,7 @@ export default function HomeScreen() {
       </View>
 
       <Button title="Submit" onPress={handleSubmit} />
+      <ExportDbButton />
     </ThemedView>
   );
 }
