@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useState } from 'react';
 import { Button, Pressable, StyleSheet, View } from 'react-native';
-//for commiting
+
 export default function HomeScreen() {
   const [option, setOption] = useState<'a' | 'b' | null>(null);
   const [text, setText] = useState('');
