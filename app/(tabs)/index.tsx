@@ -1,10 +1,15 @@
 import { ThemedInput } from '@/components/ThemedInput';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useState } from 'react';
+import { initDatabase } from '@/database/migrations';
+import { useEffect, useState } from 'react';
 import { Button, Pressable, StyleSheet, View } from 'react-native';
 
 export default function HomeScreen() {
+  useEffect(() => {
+    initDatabase();
+  }, []);
+
   const [option, setOption] = useState<'a' | 'b' | null>(null);
   const [text, setText] = useState('');
   const [selection, setSelection] = useState<string>('');
