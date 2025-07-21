@@ -1,6 +1,6 @@
-OPERATOR
-- name: str (optional)
-- stores: list[str]
+STORES
+- id: int
+- name: str
 
 UNIFORMS
 - id: int
@@ -9,8 +9,9 @@ UNIFORMS
 
 OPERATIONS
 - id: int
+- store: int            # FK at STORES.id
 - operation: bool       # Entry (true) or Exit (false)
+- concept: str
 - uniform: int          # FK at UNIFORMS.id
-- store: str
 - quantity: int
 - date: datetime
