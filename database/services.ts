@@ -1,4 +1,4 @@
-import db from './db';
+import db from '@/database/db';
 
 // FETCHING DATA
 export const getStores = async () => {
