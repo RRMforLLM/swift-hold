@@ -1,12 +1,13 @@
 import { ExportDbButton } from "@/components/ExportDbButton";
 import { ResetDbButton } from "@/components/ResetDbButton";
 import { initDatabase } from "@/database/migrations";
-import { getStores } from "@/database/services";
+import { getStores, insertStore } from "@/database/services";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Index() {
   const [stores, setStores] = useState<unknown[] | null>(null);
+  const [storeName, setStoreName] = useState('');
 
   useEffect(() => {
     const setup = async () => {
@@ -16,6 +17,19 @@ export default function Index() {
     };
     setup();
   }, []);
+
+  const addStore = async () => {
+    if (!storeName.trim()) return;
+    
+    try {
+      await insertStore({ name: storeName.trim() });
+      const updatedStores = await getStores();
+      setStores(updatedStores);
+      setStoreName('');
+    } catch (error) {
+      console.error('Error adding store:', error);
+    }
+  }
 
   if (stores === null) {
     return (
@@ -29,7 +43,7 @@ export default function Index() {
 
   if (stores.length > 0) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={styles.container}>
         <Text>The user has {stores.length} stores</Text>
         <ExportDbButton />
         <ResetDbButton />
@@ -39,11 +53,25 @@ export default function Index() {
   
   if (stores.length === 0) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>The user has no stores</Text>
+      <View style={styles.container}>
+        <Text>Registra tu primera tienda!</Text>
+        <TextInput
+          placeholder="Nombre de la tienda"
+          value={storeName}
+          onChangeText={setStoreName}
+        />
+        <Button title="Registrar" onPress={addStore} />
         <ExportDbButton />
         <ResetDbButton />
       </View>
     )
   };
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  }
+})
