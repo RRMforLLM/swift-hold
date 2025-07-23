@@ -1,7 +1,7 @@
 1. The user will open the app
 2. The app will check if the user has any STORES
 If the user doesn't have any:
-    3. The user will be prompted to name open
+    3. The user will be prompted to name one
 Else if the user does have any:
     3. The user will be let into the main screen
 4. The user will be (let) prompted to register a movement
