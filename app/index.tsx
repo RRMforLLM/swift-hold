@@ -8,6 +8,9 @@ import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 export default function Index() {
   const [stores, setStores] = useState<unknown[] | null>(null);
   const [storeName, setStoreName] = useState('');
+  const [uniforms, setUniforms] = useState<unknown[] | null>(null);
+  const [uniformType, setUniformType] = useState('');
+  const [uniformSize, setUniformSize] = useState('');
 
   useEffect(() => {
     const setup = async () => {
@@ -17,6 +20,16 @@ export default function Index() {
     };
     setup();
   }, []);
+
+  useEffect(() => {
+    const fetchUniforms = async () => {
+      if (stores && stores.length > 0) {
+        const fetchedUniforms = await getUniforms();
+        setUniforms(fetchedUniforms);
+      }
+    };
+    fetchUniforms();
+  }, [stores]);
 
   const addStore = async () => {
     if (!storeName.trim()) return;
@@ -31,6 +44,19 @@ export default function Index() {
     }
   };
 
+  const addUniform = async () => {
+    if (!uniformType.trim() || !uniformSize.trim()) return;
+    try {
+      await insertUniform({ type: uniformType.trim(), size: uniformSize.trim() });
+      const updatedUniforms = await getUniforms();
+      setUniforms(updatedUniforms);
+      setUniformType('');
+      setUniformSize('');
+    } catch (error) {
+      console.error('Error adding uniform:', error);
+    }
+  };
+
   if (stores === null) {
     return (
       <View style={styles.container}>
@@ -42,46 +68,23 @@ export default function Index() {
   };
 
   if (stores.length > 0) {
-    const [uniforms, setUniforms] = useState<unknown[] | null>(null);
-    const [uniformType, setUniformType] = useState('');
-    const [uniformSize, setUniformSize] = useState('');
-
-    useEffect(() => {
-      const fetchUniforms = async () => {
-        const fetchedUniforms = await getUniforms();
-        setUniforms(fetchedUniforms);
-      };
-      fetchUniforms();
-    }, []);
-
-    const addUniform = async () => {
-      if (!uniformType.trim() || !uniformSize.trim()) return;
-      try {
-        await insertUniform({ type: uniformType.trim(), size: uniformSize.trim() });
-        const updatedUniforms = await getUniforms();
-        setUniforms(updatedUniforms);
-        setUniformType('');
-        setUniformSize('');
-      } catch (error) {
-        console.error('Error adding uniform:', error);
-      }
-    };
-
     if (uniforms === null) {
       return (
         <View style={styles.container}>
           <Text>Cargando uniformes...</Text>
         </View>
       );
-    };
+    }
 
     if (uniforms.length > 0) {
       return (
         <View style={styles.container}>
-          <Text>Uniformes registrados: {uniforms.length}</Text>
+          <Text>La tienda tiene {uniforms.length} uniformes registrados</Text>
+          <ExportDbButton />
+          <ResetDbButton />
         </View>
       );
-    };
+    }
 
     if (uniforms.length === 0) {
       return (
@@ -91,20 +94,21 @@ export default function Index() {
             placeholder="Tipo de uniforme"
             value={uniformType}
             onChangeText={setUniformType}
-            style={{ borderWidth: 1, borderColor: '#ccc', marginVertical: 4, width: 200, padding: 8 }}
+            style={styles.input}
           />
           <TextInput
             placeholder="Tamaño"
             value={uniformSize}
             onChangeText={setUniformSize}
-            style={{ borderWidth: 1, borderColor: '#ccc', marginBottom: 8, width: 200, padding: 8 }}
+            style={styles.input}
           />
           <Button title="Registrar" onPress={addUniform} />
           <ExportDbButton />
           <ResetDbButton />
         </View>
       );
-    };
+    }
+  }
   
   if (stores.length === 0) {
     return (
@@ -114,13 +118,13 @@ export default function Index() {
           placeholder="Nombre de la tienda"
           value={storeName}
           onChangeText={setStoreName}
+          style={styles.input}
         />
         <Button title="Registrar" onPress={addStore} />
         <ExportDbButton />
         <ResetDbButton />
       </View>
     )
-  };
   };
 }
 
@@ -129,5 +133,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginVertical: 4,
+    width: 200,
+    padding: 8,
   }
 })
