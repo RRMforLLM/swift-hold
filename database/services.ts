@@ -84,7 +84,7 @@ export const insertOperation = async ({
 }): Promise<number> => {
   const query = 'INSERT INTO OPERATIONS (store, operation, concept, uniform, quantity, date) VALUES (?, ?, ?, ?, ?, ?)';
   try {
-    const result = await db.runAsync(query, [store, operation, concept, uniform, quantity, date]);
+    const result = await db.runAsync(query, [store, operation ? 1 : 0, concept, uniform, quantity, date]);
     return result.lastInsertRowId;
   } catch (error) {
     console.error('Error inserting operation:', error);

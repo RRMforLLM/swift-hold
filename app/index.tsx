@@ -1,7 +1,7 @@
 import { ExportDbButton } from "@/components/ExportDbButton";
 import { ResetDbButton } from "@/components/ResetDbButton";
 import { initDatabase } from "@/database/migrations";
-import { getStores, getUniforms, insertStore, insertUniform } from "@/database/services";
+import { getOperations, getStores, getUniforms, insertOperation, insertStore, insertUniform } from "@/database/services";
 import { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -11,6 +11,14 @@ export default function Index() {
   const [uniforms, setUniforms] = useState<unknown[] | null>(null);
   const [uniformType, setUniformType] = useState('');
   const [uniformSize, setUniformSize] = useState('');
+  const [operations, setOperations] = useState<unknown[] | null>(null);
+  const [operationStore, setOperationStore] = useState<string | null>(null);
+  const [operationType, setOperationType] = useState('');
+  const [operationConcept, setOperationConcept] = useState('');
+  const [operationUniform, setOperationUniform] = useState<string | null>(null);
+  const [operationQuantity, setOperationQuantity] = useState('');
+  const [operationDate, setOperationDate] = useState(new Date().toISOString().split('T')[0]);
+
 
   useEffect(() => {
     const setup = async () => {
@@ -30,6 +38,16 @@ export default function Index() {
     };
     fetchUniforms();
   }, [stores]);
+
+  useEffect(() => {
+    const fetchOperations = async () => {
+      if (uniforms && uniforms.length > 0) {
+        const fetchedOperations = await getOperations();
+        setOperations(fetchedOperations);
+      }
+    };
+    fetchOperations();
+  }, [uniforms]);
 
   const addStore = async () => {
     if (!storeName.trim()) return;
@@ -57,6 +75,31 @@ export default function Index() {
     }
   };
 
+  const addOperation = async () => {
+    if (!operationStore || !operationType || !operationConcept || !operationUniform || !operationQuantity) return;
+    
+    try {
+      await insertOperation({
+        store: parseInt(operationStore),
+        operation: operationType === 'entry',
+        concept: operationConcept.trim(),
+        uniform: parseInt(operationUniform),
+        quantity: parseInt(operationQuantity),
+        date: operationDate
+      });
+      const updatedOperations = await getOperations();
+      setOperations(updatedOperations);
+      setOperationStore(null);
+      setOperationType('');
+      setOperationConcept('');
+      setOperationUniform(null);
+      setOperationQuantity('');
+      setOperationDate(new Date().toISOString().split('T')[0]);
+    } catch (error) {
+      console.error('Error adding operation:', error);
+    }
+  };
+
   if (stores === null) {
     return (
       <View style={styles.container}>
@@ -77,9 +120,89 @@ export default function Index() {
     }
 
     if (uniforms.length > 0) {
+      if (operations === null) {
+        return (
+          <View style={styles.container}>
+            <Text>Cargando operaciones...</Text>
+          </View>
+        );
+      }
+
       return (
         <View style={styles.container}>
-          <Text>La tienda tiene {uniforms.length} uniformes registrados</Text>
+          <Text>Operaciones registradas: {operations.length}</Text>
+          {operations.length > 0 && (
+            <View style={{ marginVertical: 16, width: '100%' }}>
+              {operations.slice(-5).map((op: any) => (
+                <Text key={op.id} style={{ marginBottom: 4 }}>
+                  {op.operation ? 'Entrada' : 'Salida'} - {op.concept} (Cantidad: {op.quantity})
+                </Text>
+              ))}
+            </View>
+          )}
+          <Text style={{ marginTop: 16 }}>Registrar nueva operación</Text>
+          
+          <Text>Tienda:</Text>
+          <View style={{ flexDirection: 'row', marginVertical: 8 }}>
+            {stores.map((store: any) => (
+              <Button
+                key={store.id}
+                title={store.name}
+                onPress={() => setOperationStore(store.id.toString())}
+                color={operationStore === store.id.toString() ? '#007AFF' : '#8E8E93'}
+              />
+            ))}
+          </View>
+
+          <Text>Tipo de operación:</Text>
+          <View style={{ flexDirection: 'row', marginVertical: 8 }}>
+            <Button
+              title="Entrada"
+              onPress={() => setOperationType('entry')}
+              color={operationType === 'entry' ? '#007AFF' : '#8E8E93'}
+            />
+            <Button
+              title="Salida"
+              onPress={() => setOperationType('exit')}
+              color={operationType === 'exit' ? '#007AFF' : '#8E8E93'}
+            />
+          </View>
+
+          <TextInput
+            placeholder="Concepto"
+            value={operationConcept}
+            onChangeText={setOperationConcept}
+            style={styles.input}
+          />
+
+          <Text>Uniforme:</Text>
+          <View style={{ flexDirection: 'row', marginVertical: 8, flexWrap: 'wrap' }}>
+            {uniforms.map((uniform: any) => (
+              <Button
+                key={uniform.id}
+                title={`${uniform.type} - ${uniform.size}`}
+                onPress={() => setOperationUniform(uniform.id.toString())}
+                color={operationUniform === uniform.id.toString() ? '#007AFF' : '#8E8E93'}
+              />
+            ))}
+          </View>
+
+          <TextInput
+            placeholder="Cantidad"
+            value={operationQuantity}
+            onChangeText={setOperationQuantity}
+            keyboardType="numeric"
+            style={styles.input}
+          />
+
+          <TextInput
+            placeholder="Fecha (YYYY-MM-DD)"
+            value={operationDate}
+            onChangeText={setOperationDate}
+            style={styles.input}
+          />
+
+          <Button title="Registrar Operación" onPress={addOperation} />
           <ExportDbButton />
           <ResetDbButton />
         </View>
