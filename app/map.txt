@@ -4,5 +4,13 @@ If the user doesn't have any:
     3. The user will be prompted to name one
 Else if the user does have any:
     3. The user will be let into the main screen
-4. The user will be (let) prompted to register a movement
-5. The user will also be able to switch to the inventory screen
+    4. The app will check if the store has registered uniforms
+    If the store doesn't have any:
+        5. The user will be prompted to add a uniform
+    Else if the store does have any:
+        5. The user will be let into the operation form
+        6. The app will check if the store has any registered operations
+        If the store doesn't have any:
+            7. The user will be prompted to register an operation
+        Else if the store does have any:
+            7. The user will be let into the inventory screen
