@@ -33,3 +33,5 @@ Swift Stock is an inventory management application designed to track uniforms ac
 ## Tech Stack
 
 This is a mobile application built with React Native and Expo.
+
+TODO: Update file
