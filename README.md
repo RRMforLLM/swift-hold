@@ -4,18 +4,19 @@ Swift Stock is an inventory management application designed to track uniforms ac
 
 ## Features
 
-- **Operator Management**: Track operators and their associated stores
+- **Store Management**: Track multiple store locations
 - **Uniform Inventory**: Keep record of uniforms with their types and sizes
 - **Stock Operations**: Monitor uniform movements:
   - Track entries (incoming stock)
   - Track exits (outgoing stock)
   - Record quantities, dates, and store locations
+- **Database Export/Import**: Export and reset database functionality
 
 ## Database Structure
 
-### Operators
-- Store operators with their names (optional)
-- Maintain lists of stores associated with each operator
+### Stores
+- Unique identifier and name for each store location
+- Track store information for inventory management
 
 ### Uniforms
 - Unique identifier for each uniform type
@@ -32,6 +33,7 @@ Swift Stock is an inventory management application designed to track uniforms ac
 
 ## Tech Stack
 
-This is a mobile application built with React Native and Expo.
-
-TODO: Update file
+- **React Native** with **Expo** for cross-platform mobile development
+- **TypeScript** for type safety
+- **SQLite** (expo-sqlite) for local database storage
+- **Expo Router** for navigation
