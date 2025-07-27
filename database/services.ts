@@ -24,10 +24,41 @@ export const getUniforms = async () => {
 };
 
 export const getOperations = async () => {
-  const query = 'SELECT * FROM OPERATIONS';
+  const query = `
+    SELECT 
+      o.id,
+      o.operation,
+      o.concept,
+      o.quantity,
+      o.date,
+      s.id as store_id,
+      s.name as store_name,
+      u.id as uniform_id,
+      u.type as uniform_type,
+      u.size as uniform_size
+    FROM OPERATIONS o
+    JOIN STORES s ON o.store = s.id
+    JOIN UNIFORMS u ON o.uniform = u.id
+    ORDER BY o.date DESC
+  `;
   try {
     const result = await db.getAllAsync(query);
-    return result;
+    return result.map((row: any) => ({
+      id: row.id,
+      operation: row.operation === 1,
+      concept: row.concept,
+      quantity: row.quantity,
+      date: row.date,
+      store: {
+        id: row.store_id,
+        name: row.store_name
+      },
+      uniform: {
+        id: row.uniform_id,
+        type: row.uniform_type,
+        size: row.uniform_size
+      }
+    }));
   } catch (error) {
     console.error('Error fetching operations:', error);
     throw error;

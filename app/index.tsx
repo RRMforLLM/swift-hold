@@ -130,16 +130,6 @@ export default function Index() {
 
       return (
         <View style={styles.container}>
-          <Text>Operaciones registradas: {operations.length}</Text>
-          {operations.length > 0 && (
-            <View style={{ marginVertical: 16, width: '100%' }}>
-              {operations.slice(-5).map((op: any) => (
-                <Text key={op.id} style={{ marginBottom: 4 }}>
-                  {op.operation ? 'Entrada' : 'Salida'} - {op.concept} (Cantidad: {op.quantity})
-                </Text>
-              ))}
-            </View>
-          )}
           <Text style={{ marginTop: 16 }}>Registrar nueva operación</Text>
           
           <Text>Tienda:</Text>
@@ -205,6 +195,15 @@ export default function Index() {
           <Button title="Registrar Operación" onPress={addOperation} />
           <ExportDbButton />
           <ResetDbButton />
+          {operations.length > 0 && (
+            <View style={{ marginVertical: 16, width: '100%' }}>
+              {operations.slice(-5).map((op: any) => (
+                <Text key={op.id} style={{ marginBottom: 4 }}>
+                  {op.operation ? 'Entrada' : 'Salida'} - {op.concept} (Cantidad: {op.quantity} - {op.uniform.type} - {op.uniform.size}) en {op.store.name} el {new Date(op.date).toLocaleDateString()}
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
       );
     }
