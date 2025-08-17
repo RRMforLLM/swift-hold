@@ -1,39 +1,11 @@
-# Swift Stock
+# ⚠️ Project Discontinued
 
-Swift Stock is an inventory management application designed to track uniforms across multiple stores. The application helps manage the distribution and tracking of different types of uniforms, their sizes, and movement between stores.
+This project is no longer maintained or in active development.
 
-## Features
+Any credentials, tokens, or API keys that may appear in the codebase have been **revoked** and are **no longer valid**.
 
-- **Store Management**: Track multiple store locations
-- **Uniform Inventory**: Keep record of uniforms with their types and sizes
-- **Stock Operations**: Monitor uniform movements:
-  - Track entries (incoming stock)
-  - Track exits (outgoing stock)
-  - Record quantities, dates, and store locations
-- **Database Export/Import**: Export and reset database functionality
+## Why this repo still exists
 
-## Database Structure
+The repository remains public for reference, archival, or educational purposes. Feel free to fork or inspect, but note that the code may no longer reflect best practices, security standards, or functional integrations.
 
-### Stores
-- Unique identifier and name for each store location
-- Track store information for inventory management
-
-### Uniforms
-- Unique identifier for each uniform type
-- Track uniform types and sizes
-
-### Operations
-- Record all stock movements (entries and exits)
-- Track:
-  - Type of operation (entry/exit)
-  - Associated uniform
-  - Store location
-  - Quantity
-  - Date and time of operation
-
-## Tech Stack
-
-- **React Native** with **Expo** for cross-platform mobile development
-- **TypeScript** for type safety
-- **SQLite** (expo-sqlite) for local database storage
-- **Expo Router** for navigation
+NOTE: This project has been migrated to 'swift-stock'.
